@@ -1,0 +1,61 @@
+﻿@page "/"
+
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+
+<PageTitle>Todo List</PageTitle>
+
+<FluentCard Width="400px" Height="Auto" Style="margin: auto">
+    <FluentStack Orientation=Orientation.Horizontal>
+        <FluentTextField @bind-Value=todo AriaLabel="No label" Placeholder="todo item" style="width: 100%;"></FluentTextField>
+        <FluentButton Appearance="Appearance.Accent" OnClick="OnAddTodo">Add</FluentButton>
+    </FluentStack>
+    <FluentDivider />
+    <FluentStack Orientation=Orientation.Vertical>
+        @foreach(var todo in todoList)
+        {
+            <BlazorTodoList.Components.Todo TodoItem=@todo OnTodoChanged="HandleTodoChanged" OnTodoDeleted="HandleTodoDelete"/>
+        }
+        
+    </FluentStack>
+</FluentCard>
+
+@code 
+{
+    private string? todo;
+    private List<Todo> todoList;
+    protected void OnAddTodo(MouseEventArgs mouseEventArgs)
+    {
+        todoList.Add(new Todo { Title = todo, IsDone = false });
+        localStorage.SetItemAsync<List<Todo>>("todoitems", todoList);
+        todo = null;
+    }
+
+    private void HandleTodoChanged(Todo todo)
+    {
+        var index = todoList.FindIndex(t => t.Title == todo.Title);
+        if (index >= 0)
+        {
+            todoList[index] = todo;
+        }
+        localStorage.SetItemAsync<List<Todo>>("todoitems", todoList);
+    }
+
+    private void HandleTodoDelete(Todo todo)
+    {
+        var index = todoList.FindIndex(t => t.Title == todo.Title);
+        if (index >= 0)
+        {
+            todoList.RemoveAt(index);
+        }
+        localStorage.SetItemAsync<List<Todo>>("todoitems", todoList);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        todoList = await localStorage.GetItemAsync<List<Todo>>("todoitems");
+        if (todoList == null)
+        {
+            todoList = new List<Todo>();
+        }
+    }
+}

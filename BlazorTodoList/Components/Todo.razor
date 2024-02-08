@@ -1,0 +1,41 @@
+﻿
+<FluentStack Orientation=Orientation.Horizontal VerticalAlignment=VerticalAlignment.Center HorizontalAlignment=HorizontalAlignment.Left>
+    <FluentCheckbox @bind-Value=@TodoItem.IsDone @onchange="OnValueChanged"></FluentCheckbox>
+    @if (TodoItem.IsDone == true)
+    {
+        <p style="text-decoration-line:line-through;">@TodoItem.Title</p>
+    }
+    else
+    {
+        <p>@TodoItem.Title</p>
+    }
+
+    <FluentButton OnClick="OnTodoDelete"><FluentIcon Value="@(new Icons.Regular.Size20.Delete())" /></FluentButton>
+
+</FluentStack>
+
+
+
+@code {
+    [Parameter]
+    public Models.Todo? TodoItem { get; set; }
+    [Parameter]
+    public EventCallback<Models.Todo> OnTodoChanged { get; set; }
+    [Parameter]
+    public EventCallback<Models.Todo> OnTodoDeleted { get; set; }
+    private async Task OnValueChanged(ChangeEventArgs changeEventArgs)
+    {
+        if (OnTodoChanged.HasDelegate)
+        {
+            await OnTodoChanged.InvokeAsync(TodoItem);
+        }
+    }
+    private async Task OnTodoDelete(MouseEventArgs mouseEventArgs)
+    {
+        if (OnTodoDeleted.HasDelegate)
+        {
+            await OnTodoDeleted.InvokeAsync(TodoItem);
+        }
+    }
+
+}
